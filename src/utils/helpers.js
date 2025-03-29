@@ -236,3 +236,79 @@ export function getRequestBodySchema(requestBody) {
     const preferredContentType = getContentType(requestBody);
     return requestBody.content[preferredContentType]?.schema || null;
 }
+
+/**
+ * Recursively searches for a term within an OpenAPI Schema object.
+ * Checks descriptions, enum values (if string), property names, and nested schemas.
+ * NOTE: Assumes $refs have been resolved *before* calling this,
+ *       or handle resolution internally if needed (more complex).
+ * @param {object|null} schema - The Schema object to search within.
+ * @param {string} lowerSearchTerm - The search term (already lowercased).
+ * @param {number} currentDepth - Current recursion depth (to prevent infinite loops).
+ * @param {number} maxDepth - Maximum recursion depth.
+ * @returns {boolean} True if the term is found, false otherwise.
+ */
+export function searchInSchema(schema, lowerSearchTerm, currentDepth = 0, maxDepth = 5) {
+    if (!schema || !lowerSearchTerm || currentDepth > maxDepth) {
+        return false;
+    }
+
+    // --- Direct Checks on the current schema object ---
+
+    // Check description
+    if (schema.description && schema.description.toLowerCase().includes(lowerSearchTerm)) {
+        return true;
+    }
+
+    // Check enum values (if strings)
+    if (schema.enum && schema.enum.some(val => typeof val === 'string' && val.toLowerCase().includes(lowerSearchTerm))) {
+        return true;
+    }
+
+    // Check title
+    if (schema.title && schema.title.toLowerCase().includes(lowerSearchTerm)) {
+        return true;
+    }
+
+    // --- Recursive Checks for Nested Structures ---
+
+    // Check object properties (names and nested schemas)
+    if (schema.type === 'object' && schema.properties) {
+        for (const propName in schema.properties) {
+            // Check property name itself
+            if (propName.toLowerCase().includes(lowerSearchTerm)) {
+                return true;
+            }
+            // Recursively check the property's schema
+            if (searchInSchema(schema.properties[propName], lowerSearchTerm, currentDepth + 1, maxDepth)) {
+                return true;
+            }
+        }
+    }
+
+    // Check array items
+    if (schema.type === 'array' && schema.items) {
+        if (searchInSchema(schema.items, lowerSearchTerm, currentDepth + 1, maxDepth)) {
+            return true;
+        }
+    }
+
+    // Check composition keywords (allOf, anyOf, oneOf)
+    ['allOf', 'anyOf', 'oneOf'].forEach(key => {
+        if (Array.isArray(schema[key])) {
+            if (schema[key].some(subSchema => searchInSchema(subSchema, lowerSearchTerm, currentDepth + 1, maxDepth))) {
+                return true; // Early exit if found in composition
+            }
+        }
+    });
+    // Note: Additional properties might also be relevant depending on spec structure
+
+    return false; // Term not found at this level or below
+}
+
+// Add helper to get schema from response (similar logic)
+export function getResponseSchema(response) {
+    if (!response?.content) return null;
+    const preferredContentType = getContentType(response); // Assumes getContentType exists
+    return response.content[preferredContentType]?.schema || null;
+}

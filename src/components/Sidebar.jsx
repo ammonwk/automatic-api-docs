@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOpenApi } from '../contexts/OpenApiContext';
 import { highlightSearchTerm, countEndpointsInCategory } from '../utils/helpers';
 import { Collapse } from 'react-bootstrap';
+import { use } from 'react';
 
 // Inner component for rendering each category section
 function CategorySection({
@@ -91,7 +92,11 @@ function Sidebar({
   activeEndpointId,
   setActiveEndpointId,
 }) {
-  const [expandedCategories, setExpandedCategories] = useState({});
+  // Initialize all categories as expanded by default
+  const [expandedCategories, setExpandedCategories] = useState(categories.reduce((acc, cat) => {
+    acc[cat.id] = true; // Set all categories to expanded
+    return acc;
+  }, {}));
 
   // Effect to expand the active category or all categories if searching
   useEffect(() => {

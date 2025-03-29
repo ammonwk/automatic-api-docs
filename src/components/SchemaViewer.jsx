@@ -1,48 +1,67 @@
 import React, { useState } from 'react';
+import { highlightSearchTerm } from '../utils/helpers'; // Import helper
 
-// Basic Schema Viewer - Can be significantly enhanced
-function SchemaViewer({ schema, spec, isRoot = false, indentLevel = 0 }) {
-    const [isExpanded, setIsExpanded] = useState(isRoot || indentLevel < 1); // Expand root or first level by default
+// Add searchTerm to props
+function SchemaViewer({ schema, spec, isRoot = false, indentLevel = 0, searchTerm }) {
+    const [isExpanded, setIsExpanded] = useState(isRoot || indentLevel < 1);
 
-    if (!schema) {
-        return <span className="text-muted fst-italic">No schema</span>;
-    }
+    // Helper to render highlighted text or plain text
+    const renderHighlighted = (text, defaultWrapper = 'span') => {
+        if (!text) return null;
+        if (searchTerm) {
+            // Use dangerouslySetInnerHTML for the wrapper element
+            const Tag = defaultWrapper;
+            return <Tag dangerouslySetInnerHTML={{ __html: highlightSearchTerm(text, searchTerm) }} />;
+        } else {
+            // Render plain text without extra wrapper if possible, or use default
+            return text;
+        }
+    };
 
-    // Basic $ref resolution (should ideally be handled during transformation)
-    if (schema.$ref && spec) {
+    // --- Handle $ref resolution ---
+    // IMPORTANT: This basic resolution might fail for complex cases.
+    // It's STRONGLY recommended to resolve *all* refs during the initial
+    // parsing/transformation step in useOpenApiParser.js for reliability.
+    let resolvedSchema = schema; // Start with the passed schema
+    if (schema?.$ref && spec) {
         const refPath = schema.$ref.substring(2).split('/');
-        let resolvedSchema = spec;
+        let current = spec;
         try {
             for (const key of refPath) {
-                resolvedSchema = resolvedSchema[key];
+                current = current?.[key];
             }
-            schema = resolvedSchema || schema; // Use resolved schema or stick with original ref if not found
+            resolvedSchema = current || schema; // Use resolved or fallback to original ref
         } catch (e) {
-            console.warn(`Could not resolve $ref: ${schema.$ref}`);
-            // Stick with the original schema which just contains the $ref
+            console.warn(`SchemaViewer: Could not resolve $ref: ${schema.$ref}`);
+            resolvedSchema = schema; // Keep original ref object on error
         }
     }
+    // Use resolvedSchema from now on
+    // -----------------------------
+
+     if (!resolvedSchema) {
+         return <span className="text-muted fst-italic">No schema</span>;
+     }
+
 
     const toggleExpand = (e) => {
-        e.stopPropagation(); // Prevent parent toggles
+        e.stopPropagation();
         setIsExpanded(!isExpanded);
     };
 
     const indentStyle = { paddingLeft: `${indentLevel * 15}px` };
-    const hasNestedProperties = schema.type === 'object' && schema.properties && Object.keys(schema.properties).length > 0;
-    const isArrayWithItems = schema.type === 'array' && schema.items;
+    const hasNestedProperties = resolvedSchema.type === 'object' && resolvedSchema.properties && Object.keys(resolvedSchema.properties).length > 0;
+    const isArrayWithItems = resolvedSchema.type === 'array' && resolvedSchema.items;
 
     const renderSchemaType = () => {
-        let typeString = schema.type || 'any';
-        if (schema.format) {
-            typeString += ` (${schema.format})`;
-        }
-        if (schema.enum) {
-            typeString += ` [${schema.enum.join(', ')}]`;
-        }
-        if (schema.default) {
-             typeString += ` (default: ${JSON.stringify(schema.default)})`;
-        }
+        let typeString = resolvedSchema.type || 'any';
+        if (resolvedSchema.format) typeString += ` (${resolvedSchema.format})`;
+        // Highlight enum values
+        if (resolvedSchema.enum) typeString += ` [${resolvedSchema.enum.map(e => renderHighlighted(String(e))).join(', ')}]`;
+        if (resolvedSchema.default !== undefined) typeString += ` (default: ${JSON.stringify(resolvedSchema.default)})`;
+        // Type string itself is unlikely to be highlighted, but parts (enum) can be.
+        // Using React elements within the string requires careful construction or splitting.
+        // Simple approach: Don't highlight the type string itself for now.
         return <code className="schema-type">{typeString}</code>;
     };
 
@@ -54,35 +73,39 @@ function SchemaViewer({ schema, spec, isRoot = false, indentLevel = 0 }) {
                 </button>
             )}
             {renderSchemaType()}
-            {schema.description && <span className="schema-description text-muted ms-2">- {schema.description}</span>}
+            {/* Highlight Description */}
+            {resolvedSchema.description && <span className="schema-description text-muted ms-2">{renderHighlighted(`- ${resolvedSchema.description}`)}</span>}
+            {/* Other badges/info */}
             {schema.deprecated && <span className="badge bg-warning text-dark ms-2">Deprecated</span>}
             {schema.readOnly && <span className="badge bg-info text-dark ms-2">Read Only</span>}
             {schema.writeOnly && <span className="badge bg-info text-dark ms-2">Write Only</span>}
-            {schema.$ref && <span className="schema-ref text-muted ms-2">(ref: {schema.$ref})</span>}
+            {resolvedSchema.$ref && !Object.is(resolvedSchema, schema) && <span className="schema-ref text-muted ms-2">(resolved ref: {schema.$ref})</span>}
 
 
             {isExpanded && (
                 <div className="schema-details mt-1">
-                    {schema.type === 'object' && schema.properties && (
+                    {resolvedSchema.type === 'object' && resolvedSchema.properties && (
                         <div className="schema-properties">
-                            {Object.entries(schema.properties).map(([propName, propSchema]) => (
+                            {Object.entries(resolvedSchema.properties).map(([propName, propSchema]) => (
                                 <div key={propName} className="schema-property">
-                                    <strong className="schema-prop-name">{propName}</strong>
-                                    {schema.required?.includes(propName) && <span className="param-required ms-1">*</span>}
-                                    <SchemaViewer schema={propSchema} spec={spec} indentLevel={indentLevel + 1} />
+                                    {/* Highlight Property Name */}
+                                    <strong className="schema-prop-name">{renderHighlighted(propName)}</strong>
+                                    {resolvedSchema.required?.includes(propName) && <span className="param-required ms-1">*</span>}
+                                    {/* Pass searchTerm recursively */}
+                                    <SchemaViewer schema={propSchema} spec={spec} indentLevel={indentLevel + 1} searchTerm={searchTerm} />
                                 </div>
                             ))}
                         </div>
                     )}
-                    {schema.type === 'array' && schema.items && (
+                    {resolvedSchema.type === 'array' && resolvedSchema.items && (
                          <div className="schema-array-items">
                             <strong>Items:</strong>
-                            <SchemaViewer schema={schema.items} spec={spec} indentLevel={indentLevel + 1} />
+                            {/* Pass searchTerm recursively */}
+                            <SchemaViewer schema={resolvedSchema.items} spec={spec} indentLevel={indentLevel + 1} searchTerm={searchTerm} />
                          </div>
                     )}
-                    {/* Add more details like examples, constraints (minLength, etc.) here */}
-                     {schema.example && <div className="schema-example text-muted">Example: <code>{JSON.stringify(schema.example)}</code></div>}
-
+                    {/* Highlight Example (if it's a string) */}
+                     {resolvedSchema.example && <div className="schema-example text-muted">Example: <code>{typeof resolvedSchema.example === 'string' ? renderHighlighted(resolvedSchema.example) : JSON.stringify(resolvedSchema.example)}</code></div>}
                 </div>
             )}
         </div>

@@ -706,3 +706,16 @@ body.dark-mode .schema-details {
     margin-bottom: 5px;
     color: var(--text-color-secondary);
 }
+
+.highlight { /* Search term highlight */
+    background-color: var(--highlight-strong-bg);
+    padding: 0px 2px;
+    border-radius: 2px;
+    color: #333; /* Ensure readability on yellow */
+    font-weight: bold;
+}
+body.dark-mode .highlight {
+    color: #000; /* Darker text on orange/yellow in dark mode */
+     /* Optional: Adjust background for dark mode if needed */
+    /* background-color: #FFA500; */
+}

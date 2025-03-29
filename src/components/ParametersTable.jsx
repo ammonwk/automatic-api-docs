@@ -1,27 +1,36 @@
 import React from 'react';
 import SchemaViewer from './SchemaViewer'; // Optional component for complex schemas
+import { highlightSearchTerm } from '../utils/helpers';
 
-function ParametersTable({ parameters = [], requestBody = null, spec }) {
+function ParametersTable({ parameters = [], requestBody = null, spec, searchTerm }) {
     const hasPathParams = parameters.some(p => p.in === 'path');
     const hasQueryParams = parameters.some(p => p.in === 'query');
     const hasHeaderParams = parameters.some(p => p.in === 'header');
     const hasCookieParams = parameters.some(p => p.in === 'cookie');
 
+    // Helper to render highlighted text or plain text
+    const renderHighlighted = (text) => {
+        return searchTerm ? { dangerouslySetInnerHTML: { __html: highlightSearchTerm(text || '', searchTerm) } } : { children: text || '' };
+    };
+
     const renderParameterRow = (param, index) => (
-        <tr key={`${param.in}-${param.name}-${index}`}>
-            <td>
-                <span className="param-name">{param.name}</span>
-                {param.required && <span className="param-required ms-1">*</span>}
-            </td>
-            <td>
-                <SchemaViewer schema={param.schema} spec={spec} />
-            </td>
-             <td>
-                <span className={`param-in param-in-${param.in}`}>{param.in}</span>
-            </td>
-            <td dangerouslySetInnerHTML={{ __html: param.description || '' }} />
-        </tr>
-    );
+      <tr key={`${param.in}-${param.name}-${index}`}>
+          <td>
+              {/* Highlight Name */}
+              <span className="param-name" {...renderHighlighted(param.name)} />
+              {param.required && <span className="param-required ms-1">*</span>}
+          </td>
+          <td>
+              {/* Pass searchTerm to SchemaViewer */}
+              <SchemaViewer schema={param.schema} spec={spec} searchTerm={searchTerm} />
+          </td>
+           <td>
+              <span className={`param-in param-in-${param.in}`}>{param.in}</span>
+          </td>
+          {/* Highlight Description */}
+          <td {...renderHighlighted(param.description)} />
+      </tr>
+  );
 
   return (
     <div className="parameters-table-container">
@@ -71,10 +80,12 @@ function ParametersTable({ parameters = [], requestBody = null, spec }) {
         <>
           <h6 className="mt-3">Request Body</h6>
            <div className="request-body-details mb-2">
-                {requestBody.description && <p dangerouslySetInnerHTML={{ __html: requestBody.description }} />}
+                {/* Highlight Request Body Description */}
+                {requestBody.description && <p {...renderHighlighted(requestBody.description)} />}
                 {requestBody.required && <p><span className="param-required">* Required</span></p>}
             </div>
-          <SchemaViewer schema={requestBody.schema} spec={spec} isRoot={true} />
+           {/* Pass searchTerm to SchemaViewer for request body */}
+          <SchemaViewer schema={requestBody.schema} spec={spec} isRoot={true} searchTerm={searchTerm} />
         </>
       )}
 

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import CodeBlock from './CodeBlock';
 import ParametersTable from './ParametersTable';
 import ResponseTable from './ResponseTable';
-import { generateExampleResponse } from '../utils/helpers';
+import { generateExampleResponse, highlightSearchTerm } from '../utils/helpers';
 import {
   generateCurlExample,
   generateJavaScriptExample,
@@ -10,7 +10,7 @@ import {
   generatePythonExample
 } from '../utils/codeExamples'; // Assuming these are adapted
 
-function EndpointCard({ endpoint, spec }) { // Receive raw spec if needed for deep resolution
+function EndpointCard({ endpoint, spec, searchTerm }) { // Receive raw spec if needed for deep resolution
 
     const exampleRequestLanguages = useMemo(() => [
         { name: 'cURL', code: generateCurlExample(endpoint, spec) },
@@ -21,41 +21,51 @@ function EndpointCard({ endpoint, spec }) { // Receive raw spec if needed for de
 
     const exampleResponse = useMemo(() => generateExampleResponse(endpoint, spec), [endpoint, spec]);
 
+    // Helper to render highlighted text or plain text
+    const renderHighlighted = (text) => {
+        return searchTerm ? { dangerouslySetInnerHTML: { __html: highlightSearchTerm(text, searchTerm) } } : { children: text };
+    };
+
     return (
-      // Add scroll-margin-top here or in CSS
       <div className="endpoint-card card mb-4" id={endpoint.id} >
         <div className="endpoint-header card-header">
           <span className={`method-label method-${endpoint.method.toLowerCase()}`}>
             {endpoint.method}
           </span>
           <h4 className="endpoint-title d-inline-block mb-0 ms-2">
-            <span className="endpoint-path">{endpoint.path}</span>
-            {endpoint.summary && <small className="endpoint-summary text-muted d-block fw-normal">{endpoint.summary}</small>}
+            {/* Highlight Path */}
+            <span className="endpoint-path" {...renderHighlighted(endpoint.path)} />
+            {/* Highlight Summary */}
+            {endpoint.summary && <small className="endpoint-summary text-muted d-block fw-normal" {...renderHighlighted(endpoint.summary)} />}
           </h4>
         </div>
 
         <div className="card-body">
+            {/* Highlight Description */}
             {endpoint.description && (
                 <div className="endpoint-description mb-3">
-                    <p dangerouslySetInnerHTML={{ __html: endpoint.description }} /> {/* Allow basic markdown if needed */}
+                    <p {...renderHighlighted(endpoint.description)} />
                 </div>
             )}
 
+            {/* Pass searchTerm to ParametersTable */}
             {(endpoint.parameters?.length > 0 || endpoint.requestBody) && (
                 <div className="parameters-section mb-4">
                     <h5 className="section-title">Parameters</h5>
                     <ParametersTable
                         parameters={endpoint.parameters || []}
                         requestBody={endpoint.requestBody}
-                        spec={spec} // Pass spec for resolving schemas if needed
+                        spec={spec}
+                        searchTerm={searchTerm} // Pass down
                     />
                 </div>
             )}
 
+            {/* Pass searchTerm to ResponseTable */}
             {endpoint.responses && Object.keys(endpoint.responses).length > 0 && (
                  <div className="response-section mb-4">
                     <h5 className="section-title">Responses</h5>
-                    <ResponseTable responses={endpoint.responses} spec={spec} />
+                    <ResponseTable responses={endpoint.responses} spec={spec} searchTerm={searchTerm} /> {/* Pass down */}
                  </div>
             )}
 
@@ -77,4 +87,4 @@ function EndpointCard({ endpoint, spec }) { // Receive raw spec if needed for de
     );
   }
 
-export default React.memo(EndpointCard); // Memoize based on props
+export default React.memo(EndpointCard);
