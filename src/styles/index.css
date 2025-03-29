@@ -25,9 +25,9 @@
 
 
     --sidebar-width: 300px;
-    --navbar-height: 60px; /* Approximate navbar height */
-    --category-title-height: 50px; /* Approximate category title height */
-    --endpoint-header-height: 60px; /* Approximate endpoint header height */
+    --navbar-height: 70px; /* Approximate navbar height */
+    --category-title-height: 70px; /* Approximate category title height */
+    --endpoint-header-height: 55px; /* Approximate endpoint header height */
 }
 
 /* Dark Mode Variables */
@@ -148,6 +148,7 @@ body.dark-mode .sidebar {
     padding: 8px 15px;
     background-color: transparent;
     color: var(--text-color);
+    background-color: #fff;
     cursor: pointer;
     border: none;
     text-align: left;
@@ -173,6 +174,11 @@ body.dark-mode .category-header.active {
 }
 .category-header.all-tags-header.active {
      border-left-color: var(--text-color-secondary); /* Different active for "All" */
+}
+.category-header.sticky-when-expanded {
+    position: sticky;
+    top: 0; /* Stick to the top of the .sidebar */
+    z-index: 2; /* Ensure it stays above other content within the sidebar */
 }
 
 
@@ -301,7 +307,6 @@ body.dark-mode .endpoint-link.active {
     padding: 25px;
     transition: margin-left 0.3s ease;
     width: calc(100% - var(--sidebar-width)); /* Fill remaining space */
-    overflow-y: auto; /* Allow content scrolling */
 }
 
 @media (max-width: 991.98px) {
@@ -412,12 +417,17 @@ body.dark-mode .endpoint-description {
 }
 
 .section-title {
+    position: sticky;
+    top: calc(var(--navbar-height) + var(--category-title-height) + var(--endpoint-header-height)); /* Stick below endpoint header */
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--primary-color);
+    background-color: var(--secondary-color);
     margin-bottom: 15px;
-    padding-bottom: 5px;
+    padding-top: 5px;
+    padding-bottom: 10px;
     border-bottom: 1px solid var(--border-color);
+    z-index: 70; /* Below endpoint header */
 }
 body.dark-mode .section-title {
     color: var(--link-color);

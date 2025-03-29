@@ -35,7 +35,7 @@ function CategorySection({
   return (
     <div className="category mb-1" id={`category-nav-${category.id}`}>
       <button
-        className={`category-header ${activeCategoryId === category.id ? 'active' : ''}`}
+        className={`category-header ${activeCategoryId === category.id ? 'active' : ''} ${expanded ? 'sticky-when-expanded' : ''}`}
         onClick={() => onCategoryClick(category.id)}
         aria-expanded={expanded}
         aria-controls={`collapse-${category.id}`}
