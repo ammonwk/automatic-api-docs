@@ -1,0 +1,52 @@
+/* src/App.css - Keep minimal app-specific layout styles here if needed */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column; /* Stack spinner and text */
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; /* Ensure it takes some space */
+  padding: 40px;
+  text-align: center;
+  color: var(--text-color-secondary); /* Use secondary text color */
+}
+
+.loading-spinner .spinner-border {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem; /* Space between spinner and text */
+}
+
+.main-content.no-spec {
+    margin-left: 0 !important; /* Override sidebar margin when no spec */
+    max-width: 100vw !important;
+    display: flex;
+    justify-content: center; /* Center the SpecInput component */
+    align-items: flex-start; /* Align SpecInput to the top */
+    padding-top: 40px;
+}
+
+.main-content.sidebar-hidden {
+    margin-left: 0 !important;
+    max-width: 100vw !important;
+}
+
+/* Ensure content container is visible */
+#content-container {
+    width: 100%;
+}
+
+/* Adjustments for sticky elements */
+html {
+    scroll-padding-top: 70px; /* Global offset for fixed navbar */
+}
+
+/* Specific offset for endpoint links, considering navbar and category header */
+.endpoint-card {
+    scroll-margin-top: 130px; /* Navbar height + Category title approx height */
+}

@@ -1,0 +1,698 @@
+/* src/styles/index.css */
+:root {
+    --primary-color: #4a4a8c; /* Adjusted primary color */
+    --primary-color-dark: #35356b;
+    --secondary-color: #f8f9fa;
+    --text-color: #343a40;
+    --text-color-secondary: #6c757d;
+    --border-color: #dee2e6;
+    --highlight-bg: #e9ecef;
+    --highlight-strong-bg: #ffc107; /* Yellow for search highlight */
+    --code-bg: #f1f1f1;
+    --code-text: #212529;
+    --link-color: var(--primary-color);
+    --link-hover-color: var(--primary-color-dark);
+
+    /* Method colors */
+    --method-get: #28a745;
+    --method-post: #0d6efd;
+    --method-put: #fd7e14;
+    --method-delete: #dc3545;
+    --method-patch: #6f42c1;
+    --method-options: #6c757d;
+    --method-head: #adb5bd;
+    --method-trace: #adb5bd;
+
+
+    --sidebar-width: 300px;
+    --navbar-height: 60px; /* Approximate navbar height */
+    --category-title-height: 50px; /* Approximate category title height */
+    --endpoint-header-height: 60px; /* Approximate endpoint header height */
+}
+
+/* Dark Mode Variables */
+body.dark-mode {
+    --primary-color: #6969aa;
+    --primary-color-dark: #50508a;
+    --secondary-color: #2a2a3a; /* Darker secondary */
+    --text-color: #e8e6e3;
+    --text-color-secondary: #adb5bd;
+    --border-color: #444455; /* Darker border */
+    --highlight-bg: #3a3a4a;
+    --highlight-strong-bg: #f0ad4e; /* Adjust highlight for dark */
+    --code-bg: #1e1e2e; /* Darker code background */
+    --code-text: #d4d4d4;
+    --link-color: #8a8aff; /* Lighter link */
+    --link-hover-color: #a0a0ff;
+
+    /* Method colors (adjust for contrast if needed) */
+    --method-get: #4caf50;
+    --method-post: #42a5f5;
+    --method-put: #ffa726;
+    --method-delete: #ef5350;
+    --method-patch: #ab47bc;
+}
+
+
+/* General Body Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    padding-top: var(--navbar-height); /* Space for fixed navbar */
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: var(--primary-color-dark);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    min-height: var(--navbar-height);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+}
+.navbar-brand .fa-book-open {
+    font-size: 1.5rem; /* Make icon larger */
+}
+.api-version {
+    font-size: 0.7rem;
+    font-weight: normal;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    margin-left: 0.5em;
+}
+
+.search-input {
+    max-width: 250px; /* Limit search input width */
+}
+
+.dark-mode-toggle {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.8);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.375rem 0.75rem;
+    transition: color 0.2s;
+}
+.dark-mode-toggle:hover {
+    color: white;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    width: var(--sidebar-width);
+    padding: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    background-color: #fff;
+    border-right: 1px solid var(--border-color);
+    transition: transform 0.3s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+body.dark-mode .sidebar {
+    background-color: var(--secondary-color);
+    border-right-color: var(--border-color);
+}
+
+.sidebar:not(.show) {
+    transform: translateX(-100%);
+}
+
+/* Sidebar Category Headers */
+.category-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    background-color: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    width: 100%;
+    font-weight: 500;
+    border-radius: 0;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-left: 3px solid transparent; /* Indicator for active */
+}
+.category-header:hover {
+    background-color: var(--highlight-bg);
+}
+.category-header.active {
+    background-color: var(--highlight-bg);
+    color: var(--primary-color);
+    font-weight: 600;
+    border-left-color: var(--primary-color);
+}
+body.dark-mode .category-header.active {
+    color: var(--link-color); /* Use link color for active in dark mode */
+    border-left-color: var(--link-color);
+}
+.category-header.all-tags-header.active {
+     border-left-color: var(--text-color-secondary); /* Different active for "All" */
+}
+
+
+.category-icon {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    color: var(--text-color-secondary);
+}
+.category-header.active .category-icon {
+    color: var(--primary-color);
+}
+body.dark-mode .category-header.active .category-icon {
+    color: var(--link-color);
+}
+
+.toggle-icon {
+    transition: transform 0.3s;
+    color: var(--text-color-secondary);
+}
+.category-header[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.category-count {
+    background-color: var(--highlight-bg);
+    color: var(--text-color-secondary);
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: normal;
+}
+body.dark-mode .category-count {
+    background-color: var(--border-color);
+}
+.category-header.active .category-count {
+     background-color: var(--primary-color);
+     color: white;
+}
+body.dark-mode .category-header.active .category-count {
+     background-color: var(--link-color);
+     color: var(--secondary-color);
+}
+
+
+/* Sidebar Endpoint List */
+.endpoint-list {
+    padding: 5px 0 5px 10px; /* Indent list items */
+    margin: 0;
+    background-color: rgba(0,0,0,0.02); /* Slightly different bg for list */
+}
+body.dark-mode .endpoint-list {
+    background-color: rgba(255,255,255,0.03);
+}
+
+.endpoint-item {
+    /* border-bottom: 1px solid var(--highlight-bg); */
+}
+/* body.dark-mode .endpoint-item {
+    border-bottom-color: var(--border-color);
+} */
+
+.endpoint-link {
+    display: flex;
+    padding: 6px 15px 6px 10px; /* Adjusted padding */
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.85rem;
+    align-items: center;
+    transition: background-color 0.2s, color 0.2s;
+    border-radius: 4px;
+    margin: 1px 5px 1px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.endpoint-link:hover {
+    background-color: var(--highlight-bg);
+    text-decoration: none;
+}
+.endpoint-link.active {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+}
+body.dark-mode .endpoint-link.active {
+    background-color: var(--primary-color-dark);
+}
+
+.method-label {
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white !important; /* Ensure white text */
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-right: 8px;
+    text-align: center;
+    min-width: 45px; /* Ensure consistent width */
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+.endpoint-link.active .method-label {
+    color: white !important; /* Keep white on active link */
+}
+
+/* Assign background colors based on method */
+.method-get { background-color: var(--method-get); }
+.method-post { background-color: var(--method-post); }
+.method-put { background-color: var(--method-put); }
+.method-delete { background-color: var(--method-delete); }
+.method-patch { background-color: var(--method-patch); }
+.method-options { background-color: var(--method-options); }
+.method-head { background-color: var(--method-head); }
+.method-trace { background-color: var(--method-trace); }
+
+.endpoint-path-sidebar {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* Main Content Styles */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 25px;
+    transition: margin-left 0.3s ease;
+    width: calc(100% - var(--sidebar-width)); /* Fill remaining space */
+    overflow-y: auto; /* Allow content scrolling */
+}
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.show {
+        transform: translateX(0);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1); /* Add shadow when overlaying */
+    }
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    .main-content.sidebar-hidden {
+         margin-left: 0 !important;
+         max-width: 100vw !important;
+    }
+}
+
+/* Category Section in Main Content */
+.category-section {
+    margin-bottom: 40px;
+}
+
+.category-title {
+    position: sticky;
+    top: var(--navbar-height); /* Stick below navbar */
+    background-color: var(--secondary-color);
+    z-index: 90; /* Below navbar, above endpoint header */
+    padding: 10px 15px;
+    margin: -25px -25px 25px -25px; /* Extend to edges of main-content padding */
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-color);
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+body.dark-mode .category-title {
+     background-color: var(--secondary-color);
+     border-bottom-color: var(--border-color);
+     color: var(--link-color);
+}
+.category-description {
+    font-size: 0.9rem;
+    font-weight: normal;
+}
+
+.category-endpoints {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Reduced gap between cards */
+}
+
+
+/* Endpoint Card Styles */
+.endpoint-card {
+    position: relative; /* Needed for scroll-margin-top */
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    /* box-shadow: 0 1px 3px rgba(0,0,0,0.05); */ /* Subtle shadow */
+    /* margin-bottom: 25px; */ /* Handled by gap in category-endpoints */
+    overflow: visible; /* Allow potential overflows like badges */
+}
+body.dark-mode .endpoint-card {
+    background-color: var(--secondary-color);
+    border-color: var(--border-color);
+}
+
+.endpoint-header {
+    position: sticky;
+    top: calc(var(--navbar-height) + var(--category-title-height) - 1px); /* Stick below category title */
+    background-color: #fff; /* Match card background */
+    z-index: 80; /* Below category title */
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+body.dark-mode .endpoint-header {
+     background-color: var(--secondary-color);
+     border-bottom-color: var(--border-color);
+}
+
+.endpoint-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+.endpoint-summary {
+    font-size: 0.85rem;
+    font-family: inherit; /* Use default font for summary */
+}
+
+.endpoint-description {
+    padding: 15px;
+    font-size: 0.95rem;
+    background-color: var(--highlight-bg); /* Slightly different bg for description */
+    border-bottom: 1px solid var(--border-color);
+}
+body.dark-mode .endpoint-description {
+    background-color: var(--highlight-bg);
+    border-bottom-color: var(--border-color);
+}
+
+.endpoint-body {
+    padding: 20px;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border-color);
+}
+body.dark-mode .section-title {
+    color: var(--link-color);
+    border-bottom-color: var(--border-color);
+}
+
+/* Tables (Parameters, Responses) */
+.table-container, .table-responsive {
+    margin-bottom: 20px;
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    border-color: var(--border-color);
+}
+body.dark-mode .table {
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.table thead th {
+    background-color: var(--highlight-bg);
+    border-bottom-width: 1px;
+    font-weight: 600;
+    color: var(--text-color);
+    border-color: var(--border-color);
+    padding: 0.5rem;
+}
+body.dark-mode .table thead th {
+    background-color: var(--highlight-bg);
+    color: var(--text-color);
+     border-color: var(--border-color);
+}
+.table tbody td {
+     padding: 0.5rem;
+     vertical-align: top; /* Align content top */
+     border-color: var(--border-color);
+}
+body.dark-mode .table tbody td {
+     border-color: var(--border-color);
+}
+
+
+.param-name, .response-name {
+    font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    font-weight: 600;
+    color: var(--text-color);
+}
+body.dark-mode .param-name, body.dark-mode .response-name {
+    color: var(--text-color);
+}
+
+.param-required {
+    color: #dc3545; /* Red for required */
+    font-weight: bold;
+    font-size: 1.1em; /* Make asterisk slightly larger */
+}
+
+.param-in {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background-color: var(--highlight-bg);
+    font-size: 0.75rem;
+    font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    color: var(--text-color-secondary);
+    border: 1px solid var(--border-color);
+}
+body.dark-mode .param-in {
+    background-color: var(--highlight-bg);
+    color: var(--text-color-secondary);
+    border-color: var(--border-color);
+}
+
+/* Code Block Styles */
+.code-block {
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    position: relative;
+    margin-bottom: 20px;
+    background-color: var(--code-bg); /* Set background for the container */
+}
+body.dark-mode .code-block {
+    border-color: var(--border-color);
+    background-color: var(--code-bg);
+}
+
+.code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background-color: var(--highlight-bg);
+    border-bottom: 1px solid var(--border-color);
+    border-top-left-radius: 4px; /* Match container radius */
+    border-top-right-radius: 4px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+}
+body.dark-mode .code-header {
+    background-color: var(--highlight-bg);
+     border-bottom-color: var(--border-color);
+     color: var(--text-color-secondary);
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    transition: color 0.2s, transform 0.1s ease-out;
+    padding: 2px 5px;
+}
+.copy-btn:hover {
+    color: var(--primary-color);
+}
+body.dark-mode .copy-btn:hover {
+    color: var(--link-color);
+}
+.copy-btn.copied {
+    color: var(--method-get); /* Green check */
+    transform: scale(1.1);
+}
+
+/* Syntax Highlighter adjustments */
+.code-block pre { /* Target pre within syntax highlighter */
+    margin: 0 !important;
+    padding: 15px !important;
+    border-radius: 0 0 4px 4px !important; /* Match container */
+    max-height: 400px;
+    overflow: auto;
+    font-size: 0.85rem; /* Adjust code font size */
+    background-color: transparent !important; /* Let container handle background */
+}
+.code-block code { /* Target code within syntax highlighter */
+     font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+
+/* Tabs for request examples */
+.example-tabs {
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--secondary-color); /* Match body bg */
+    padding-left: 10px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+body.dark-mode .example-tabs {
+    background-color: var(--secondary-color);
+    border-bottom-color: var(--border-color);
+}
+
+.example-tab {
+    padding: 8px 15px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    margin-bottom: -1px; /* Overlap border */
+}
+.example-tab.active {
+    border-bottom-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+body.dark-mode .example-tab.active {
+    border-bottom-color: var(--link-color);
+    color: var(--link-color);
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+.highlight { /* Search term highlight */
+    background-color: var(--highlight-strong-bg);
+    padding: 0px 2px;
+    border-radius: 2px;
+    color: #333; /* Ensure readability on yellow */
+    font-weight: bold;
+}
+body.dark-mode .highlight {
+    color: #000; /* Darker text on orange/yellow */
+}
+
+/* Spec Input Component Styles */
+.spec-input-container {
+    background-color: #fff;
+}
+body.dark-mode .spec-input-container {
+    background-color: var(--secondary-color);
+}
+.spec-input-container textarea {
+    font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    font-size: 0.9rem;
+    background-color: var(--code-bg);
+    color: var(--code-text);
+    border-color: var(--border-color);
+}
+body.dark-mode .spec-input-container textarea {
+    background-color: var(--code-bg);
+    color: var(--code-text);
+    border-color: var(--border-color);
+}
+body.dark-mode .spec-input-container textarea::placeholder {
+    color: var(--text-color-secondary);
+}
+
+
+/* Schema Viewer Styles */
+.schema-viewer {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+.schema-type {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+body.dark-mode .schema-type {
+    color: var(--link-color);
+}
+.schema-description {
+    font-style: italic;
+}
+.schema-ref {
+    font-size: 0.8em;
+    font-style: italic;
+}
+.schema-toggle-btn {
+    background: none;
+    border: none;
+    padding: 0 5px 0 0;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    font-size: 0.8em;
+}
+.schema-details {
+    border-left: 2px solid var(--border-color);
+    padding-left: 10px;
+    margin-left: 5px; /* Adjust based on toggle button size */
+}
+body.dark-mode .schema-details {
+    border-left-color: var(--border-color);
+}
+.schema-property {
+    margin-bottom: 3px;
+}
+.schema-prop-name {
+     font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+.schema-example {
+    font-size: 0.9em;
+    margin-top: 3px;
+}
+
+/* Response Table Status Code */
+.status-code {
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+    font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+.status-code-2xx { background-color: var(--method-get); }
+.status-code-3xx { background-color: var(--method-put); }
+.status-code-4xx { background-color: #ffc107; color: #333 !important; } /* Yellow for client errors */
+.status-code-5xx { background-color: var(--method-delete); }
+
+.response-content-type {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    color: var(--text-color-secondary);
+}
